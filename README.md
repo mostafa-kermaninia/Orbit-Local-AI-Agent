@@ -14,6 +14,10 @@
   <a href="docs/DEMO_COMMANDS.md">Demo Commands</a>
   ·
   <a href="docs/TROUBLESHOOTING.md">Troubleshooting</a>
+  ·
+  <a href="docs/PRIVACY.md">Privacy</a>
+  ·
+  <a href="ROADMAP.md">Roadmap</a>
 </p>
 
 <p align="center">
@@ -26,14 +30,12 @@
   <img alt="Local AI" src="https://img.shields.io/badge/AI-local--first-00C2C7">
 </p>
 
-<p align="center">
-  <img src="docs/assets/orbit-dashboard.png" alt="ORBIT dashboard" width="100%">
-</p>
-
 > **Course companion project** for **«آموزش پروژه‌محور پردازش صوت و گفتار با پایتون»**  
 > Created and maintained by **Mostafa Kermaninia**.
 
 ---
+
+
 
 ## What ORBIT does
 
@@ -45,7 +47,7 @@ Microphone
 faster-whisper
 Speech-to-Text
    ↓
-Ollama + Qwen2.5
+Ollama + Qwen2.5 7B
 Local reasoning + tool selection
    ↓
 Tool Registry
@@ -88,7 +90,7 @@ The default interaction mode is **hands-free half-duplex**: ORBIT automatically 
 ```mermaid
 flowchart LR
     MIC[Microphone] --> STT[faster-whisper]
-    STT --> LLM[Ollama / Qwen2.5]
+    STT --> LLM[Ollama / Qwen2.5 7B]
     LLM --> REG[Tool Registry]
     REG --> WEB[Web Research]
     REG --> YT[YouTube]
@@ -145,10 +147,10 @@ Set-ExecutionPolicy -Scope Process Bypass
 ### 3. Pull the recommended local model
 
 ```powershell
-ollama pull qwen2.5
+ollama pull qwen2.5:7b
 ```
 
-The course build recommends **Qwen2.5** for a reproducible default. You can select another compatible Ollama model in `config.json`, but tool-calling behavior may differ.
+The course build recommends **Qwen2.5 7B** for a reproducible default. You can select another compatible Ollama model in `config.json`, but tool-calling behavior may differ.
 
 ### 4. Create your local configuration
 
@@ -157,6 +159,9 @@ Copy-Item config.example.json config.json
 ```
 
 `config.json` is intentionally ignored by Git.
+
+> **Public/safe default:** `config.example.json` enables confirmation for side-effecting actions.  
+> **Instructor-controlled course demo:** copy `config.course.example.json` instead if you intentionally want explicit Telegram/app commands to execute without the extra confirmation dialog.
 
 ### 5. Validate the environment
 
@@ -244,7 +249,7 @@ The main settings live in `config.json`.
 {
   "assistant_name": "ORBIT",
   "ollama_host": "http://127.0.0.1:11434",
-  "ollama_model": "qwen2.5",
+  "ollama_model": "qwen2.5:7b",
   "stt_model": "small",
   "stt_language": "en",
   "continuous_listening": true,
@@ -252,8 +257,11 @@ The main settings live in `config.json`.
   "audio_interaction_mode": "half_duplex",
   "barge_in_enabled": false,
   "tts_backend": "auto",
-  "confirm_external_actions": false,
+  "confirm_external_actions": true,
   "web_research_results": 5,
+  "web_page_char_limit": 4000,
+  "web_total_char_limit": 18000,
+  "web_max_response_bytes": 2000000,
   "telegram_launch_mode": "windows_search"
 }
 ```
@@ -272,13 +280,15 @@ Threshold-only voice barge-in is kept as an **experimental** mode in the codebas
 
 ### External-action confirmations
 
-The course demo configuration uses:
+The public repository is **safe-by-default**:
 
 ```json
-"confirm_external_actions": false
+"confirm_external_actions": true
 ```
 
-so explicit commands can execute without an extra dialog. If you adapt ORBIT for a higher-risk environment, enable confirmation and review the permissions of every registered tool.
+The course/demo profile (`config.course.example.json`) sets this to `false` for instructor-controlled demonstrations where the spoken command itself is the intended authorization.
+
+Tools still declare whether they are side-effecting; disabling the dialog does **not** change the tool's security classification.
 
 ---
 
@@ -327,15 +337,19 @@ Orbit-Local-AI-Agent/
 │   ├── telegram.py
 │   └── youtube.py
 ├── ui/
-│   └── app.py
+│   ├── app.py
+│   ├── hud.py
+│   └── sanitize.py
 ├── scripts/
 │   └── check_setup.py
 ├── tests/
 ├── docs/
 ├── .github/
 ├── config.example.json
+├── config.course.example.json
 ├── main.py
 ├── requirements.txt
+├── pyproject.toml
 └── LICENSE
 ```
 
@@ -368,8 +382,11 @@ ORBIT intentionally avoids a general-purpose shell tool.
 - Telegram automation has a PyAutoGUI fail-safe.
 - Web research does not bypass login walls, paywalls, CAPTCHAs, or anti-bot systems.
 - Tool results are returned to the LLM; the assistant is instructed not to claim success when a tool reports failure.
+- Retrieved web content is treated as untrusted data; webpage instructions cannot authorize tool actions.
+- The webpage reader blocks loopback, private, and link-local network destinations.
+- Activity Stream tool payloads are redacted/truncated before display.
 
-See [SECURITY.md](SECURITY.md) before adding higher-risk tools.
+See [SECURITY.md](SECURITY.md) before adding higher-risk tools and [docs/PRIVACY.md](docs/PRIVACY.md) for the local/network data boundary.
 
 ---
 
@@ -398,13 +415,19 @@ Run tests:
 python -m pytest -q
 ```
 
+Run critical lint checks:
+
+```powershell
+python -m ruff check . --select E9,F63,F7,F82
+```
+
 Run a syntax check:
 
 ```powershell
 python -m compileall -q assistant tools ui scripts main.py
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), and [ROADMAP.md](ROADMAP.md).
 
 ---
 

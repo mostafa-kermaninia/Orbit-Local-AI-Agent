@@ -316,11 +316,17 @@ class TelegramDesktopMessenger:
 
             return {
                 "ok": True,
+                "action_completed": True,
+                "delivery_verified": False,
                 "contact": contact.strip(),
                 "telegram_search": search_name,
-                "message": message,
                 "method": "telegram_desktop_ui_v2_flow",
+                "status": "send_key_issued",
                 "steps": steps,
+                "note": (
+                    "Telegram Desktop accepted the local send-key action. "
+                    "ORBIT does not independently verify server-side delivery."
+                ),
             }
         except pyautogui.FailSafeException:
             return {

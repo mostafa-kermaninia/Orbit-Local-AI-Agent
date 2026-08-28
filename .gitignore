@@ -35,3 +35,7 @@ dist/
 Thumbs.db
 .idea/
 .vscode/
+
+# Local recovery artifacts
+data/*.corrupt-*.json
+data/*.tmp

@@ -13,7 +13,7 @@ Microphone
    ↓
 faster-whisper (STT)
    ↓
-Ollama / Qwen2.5
+Ollama / Qwen2.5 7B
    ↓
 Tool Registry
    ├── Web Research
@@ -57,7 +57,7 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-ollama pull qwen2.5
+ollama pull qwen2.5:7b
 
 Copy-Item config.example.json config.json
 python scripts/check_setup.py
@@ -120,7 +120,7 @@ ORBIT از Bot API استفاده نمی‌کند. ابزار تلگرام رو�
 برای نسخه دوره:
 
 ```powershell
-ollama pull qwen2.5
+ollama pull qwen2.5:7b
 ```
 
 Tool Calling می‌تواند بین مدل‌ها و Quantizationهای مختلف تفاوت داشته باشد؛ بنابراین برای ضبط یا Release دقیقاً همان مدلی را تست کن که در `config.json` ثبت شده است.
@@ -139,3 +139,12 @@ Tool Calling می‌تواند بین مدل‌ها و Quantizationهای مخت
 کد ORBIT تحت [MIT License](LICENSE) منتشر شده است.
 
 Dependencyها، مدل‌های Ollama و سایر نرم‌افزارهای Third-party لایسنس مستقل خودشان را دارند. جزئیات در [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) آمده است.
+
+
+## پروفایل امن و پروفایل دوره
+
+`config.example.json` به‌صورت پیش‌فرض برای اکشن‌های Side-effect تأیید می‌گیرد. برای دموی کنترل‌شده‌ی دوره می‌توانی `config.course.example.json` را به `config.json` کپی کنی تا تأیید اضافه غیرفعال باشد.
+
+## حریم خصوصی
+
+جزئیات اینکه کدام بخش‌ها Local هستند و کدام Toolها به شبکه وصل می‌شوند در [docs/PRIVACY.md](docs/PRIVACY.md) آمده است.

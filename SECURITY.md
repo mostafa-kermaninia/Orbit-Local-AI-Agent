@@ -50,3 +50,24 @@ Never commit:
 - captured audio containing private information.
 
 If a secret is accidentally committed, rotate/revoke the secret first; deleting the file in a later commit is not sufficient.
+
+
+## Prompt injection and web content
+
+Webpage text and search snippets are untrusted input.
+
+ORBIT:
+
+- instructs the LLM not to follow instructions embedded in retrieved content;
+- applies a deterministic user-authorization guard before current side-effecting tools can execute;
+- adds a system-level reminder after web-tool results;
+- blocks private/loopback/link-local destinations in the webpage reader;
+- bounds response bytes and total research evidence size.
+
+Do not remove these boundaries when adding richer browsing features.
+
+## Action confirmations
+
+The public example configuration enables confirmations for side-effecting tools. The separate course/demo profile can disable the dialog for an instructor-controlled demonstration.
+
+A tool's `requires_confirmation` classification must remain accurate even when the dialog is disabled by configuration.

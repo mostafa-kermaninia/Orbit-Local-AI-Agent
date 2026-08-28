@@ -1,42 +1,46 @@
 # Third-party notices
 
-ORBIT depends on third-party software at runtime. Those projects are not owned by ORBIT and their upstream licenses remain in effect.
+ORBIT's MIT License covers the ORBIT source code in this repository. Runtime dependencies, model weights, applications, and online services remain separate works with their own upstream licenses and terms.
 
-The Python packages below are installed from package indexes and are not vendored in this repository.
+## Python dependencies
 
-| Component | Role in ORBIT | Upstream license / note |
-|---|---|---|
-| CustomTkinter | Desktop UI widgets | MIT |
-| NumPy | Audio/numeric arrays | BSD-3-Clause |
-| python-sounddevice | Microphone/audio I/O | MIT |
-| faster-whisper | Speech recognition runtime | MIT |
-| Ollama Python client | Local model client | MIT |
-| httpx | HTTP client | BSD-3-Clause |
-| psutil | System telemetry / process inspection | BSD-3-Clause |
-| pyttsx3 | Cross-platform TTS fallback | MPL-2.0 |
-| yt-dlp | YouTube result resolution | Upstream project license applies |
-| PyAutoGUI | Desktop automation | BSD-3-Clause |
-| Pyperclip | Clipboard operations | BSD-style license |
-| Beautiful Soup 4 | HTML parsing | MIT |
+The repository installs these packages from the Python package ecosystem rather than vendoring their source:
 
-This table is a practical project-maintenance summary, not a substitute for the full upstream license texts. Verify dependency metadata again when creating a binary distribution.
+| Component | Role |
+|---|---|
+| CustomTkinter | Desktop UI widgets |
+| NumPy | Numeric/audio arrays |
+| python-sounddevice | Microphone/audio I/O |
+| faster-whisper | Speech-recognition runtime |
+| Ollama Python client | Local-model client |
+| httpx | HTTP client |
+| psutil | System telemetry |
+| pyttsx3 | TTS fallback |
+| yt-dlp | YouTube result resolution |
+| PyAutoGUI | Desktop automation |
+| Pyperclip | Clipboard operations |
+| Beautiful Soup 4 | HTML parsing |
 
-## Models
+Refer to each installed package's upstream metadata/license for the exact version you redistribute. A source repository that installs dependencies at runtime is different from bundling those dependencies into an executable/installer.
 
-Model weights are not covered by ORBIT's MIT License.
+## Recommended model
 
-The recommended course model is:
+The course/repository default is:
 
-- **Qwen2.5** — published upstream under Apache-2.0.
+```text
+qwen2.5:7b
+```
 
-Other Qwen sizes, other Ollama models, Whisper variants, and future model releases can use different terms. Always verify the exact model/version before redistribution or commercial use.
+Qwen2.5 7B is published upstream under the Apache License 2.0. Model weights are not covered by ORBIT's MIT License.
 
-## External applications and services
+If you change model family or size, verify the exact model's license independently before commercial redistribution.
 
-- **Telegram Desktop** is not bundled with ORBIT. ORBIT only automates the user's locally installed and logged-in desktop application.
-- **YouTube**, web search engines, websites, browsers, and Ollama are external products/services and remain subject to their own terms.
-- ORBIT does not imply sponsorship, endorsement, or affiliation with any named third-party product or organization.
+## External applications/services
 
-## Redistribution
+- Telegram Desktop is not bundled with ORBIT. ORBIT automates the user's locally installed/logged-in application.
+- YouTube, web search engines, websites, browsers, Ollama, Qwen, Whisper, and other named products/services are owned by their respective parties.
+- ORBIT does not imply sponsorship, endorsement, or affiliation with those third parties.
 
-If you package ORBIT as an executable or installer, collect the license notices required by every bundled dependency and asset. A source-only repository that installs dependencies at runtime is different from redistributing those dependencies inside a binary bundle.
+## Binary redistribution
+
+If you later package ORBIT as an installer/executable, perform a fresh dependency-license inventory for the exact bundled versions and include all required notices/licenses in the distribution.

@@ -13,6 +13,8 @@ import psutil
 from assistant.config import AppConfig, save_config
 from assistant.orchestrator import VoiceAssistant
 from assistant.tool_registry import ToolSpec
+from ui.hud import draw_orbit_hud
+from ui.sanitize import clean_log_line, tool_payload_for_log
 
 
 ctk.set_appearance_mode("dark")
@@ -192,7 +194,7 @@ class OrbitUI(ctk.CTk):
         right.grid(row=0, column=2, padx=(10, 24), pady=10, sticky="e")
         ctk.CTkLabel(
             right,
-            text="LOCAL // PRIVATE",
+            text="LOCAL-FIRST // NETWORK TOOLS",
             font=("Consolas", 9, "bold"),
             text_color=self.GREEN,
         ).pack(anchor="e")
@@ -680,161 +682,16 @@ class OrbitUI(ctk.CTk):
             label.configure(text_color=color if name == active else self.DIM)
 
     def _draw_hud(self) -> None:
-        c = self.canvas
-        w = max(1, c.winfo_width())
-        h = max(1, c.winfo_height())
-        cx, cy = w / 2, h / 2
-        c.delete("all")
-
-        # Responsive grid -- density follows canvas size.
-        spacing = 46 if w >= 760 else 38
-        offset = int((self._phase * 4) % spacing)
-        for x in range(-spacing + offset, int(w) + spacing, spacing):
-            c.create_line(x, 0, x, h, fill="#07171E", width=1)
-        for y in range(-spacing + offset, int(h) + spacing, spacing):
-            c.create_line(0, y, w, y, fill="#07171E", width=1)
-
-        # Corner targeting marks.
-        margin = max(20, min(30, int(min(w, h) * 0.06)))
-        arm = max(26, min(42, int(min(w, h) * 0.075)))
-        for x1, y1, sx, sy in [
-            (margin, margin, 1, 1),
-            (w - margin, margin, -1, 1),
-            (margin, h - margin, 1, -1),
-            (w - margin, h - margin, -1, -1),
-        ]:
-            c.create_line(x1, y1, x1 + sx * arm, y1, fill="#15505F", width=2)
-            c.create_line(x1, y1, x1, y1 + sy * arm, fill="#15505F", width=2)
-
-        # Clamp the core so it never collides with the lower readout/pipeline.
-        min_dim = min(w, h)
-        base = max(76.0, min(132.0, min_dim * 0.17))
-        color = self._state_color()
-        pulse = (math.sin(self._phase * 1.8) + 1.0) / 2.0
-
-        # Subtle horizon / targeting lines.
-        c.create_line(w * 0.13, cy, w * 0.36, cy, fill="#0D3540", width=1)
-        c.create_line(w * 0.64, cy, w * 0.87, cy, fill="#0D3540", width=1)
-
-        # Rotating segmented rings.
-        rings = [
-            (base * 1.72, 2.0, 56),
-            (base * 1.48, -2.8, 78),
-            (base * 1.24, 3.7, 42),
-        ]
-        for radius, speed, extent in rings:
-            start = (self._phase * speed * 18) % 360
-            for k in range(4):
-                a = start + k * 90
-                c.create_arc(
-                    cx - radius,
-                    cy - radius,
-                    cx + radius,
-                    cy + radius,
-                    start=a,
-                    extent=extent,
-                    style="arc",
-                    outline="#176173" if k % 2 else color,
-                    width=2,
-                )
-
-        def hex_points(radius: float, angle_shift: float = 0.0) -> list[float]:
-            pts: list[float] = []
-            for i in range(6):
-                a = angle_shift + math.radians(60 * i - 30)
-                pts.extend([cx + math.cos(a) * radius, cy + math.sin(a) * radius])
-            return pts
-
-        c.create_polygon(
-            hex_points(base * 1.07, self._phase * 0.05),
-            outline="#1B7182",
-            fill="#04151B",
-            width=2,
+        draw_orbit_hud(
+            self.canvas,
+            width=max(1, self.canvas.winfo_width()),
+            height=max(1, self.canvas.winfo_height()),
+            phase=self._phase,
+            state=self._state,
+            assistant_name=self.config.assistant_name,
+            state_color=self._state_color(),
+            text_color=self.TEXT,
         )
-        c.create_polygon(
-            hex_points(base * 0.78, -self._phase * 0.08),
-            outline=color,
-            fill="#07242C",
-            width=3,
-        )
-        c.create_oval(
-            cx - base * 0.54,
-            cy - base * 0.54,
-            cx + base * 0.54,
-            cy + base * 0.54,
-            outline="#8DF6FF",
-            width=1,
-        )
-        glow = base * (0.38 + 0.03 * pulse)
-        c.create_oval(
-            cx - glow,
-            cy - glow,
-            cx + glow,
-            cy + glow,
-            fill="#0A3A45",
-            outline=color,
-            width=2,
-        )
-
-        # Orbiting data nodes.
-        for i in range(8):
-            a = self._phase * (0.55 if i % 2 else -0.43) + i * math.tau / 8
-            radius = base * (1.39 if i % 2 else 1.62)
-            x = cx + math.cos(a) * radius
-            y = cy + math.sin(a) * radius
-            r = 3 if i % 3 else 5
-            c.create_oval(x - r, y - r, x + r, y + r, fill=color, outline="")
-
-        # Core typography has guaranteed spacing; no tagline inside the hexagon.
-        title_size = 24 if base >= 110 else 20
-        c.create_text(
-            cx,
-            cy - 15,
-            text=self.config.assistant_name,
-            fill=self.TEXT,
-            font=("Segoe UI", title_size, "bold"),
-        )
-        c.create_text(
-            cx,
-            cy + 19,
-            text=self._state,
-            fill=color,
-            font=("Consolas", 11, "bold"),
-        )
-
-        # Tagline moved OUTSIDE the core; this fixes the overlap visible in the screenshot.
-        tagline_y = cy + base * 1.05
-        c.create_text(
-            cx,
-            tagline_y,
-            text="VOICE  //  REASON  //  ACT",
-            fill="#6F9DA8",
-            font=("Consolas", 8, "bold"),
-        )
-
-        # Synthetic signal bars sit well below the tagline.
-        active = self._state in {"LISTENING", "TRANSCRIBING", "THINKING", "SPEAKING"}
-        energy = 28 if active else 8
-        bar_y = min(h - 34, cy + base * 1.52)
-        for i in range(-15, 16):
-            x = cx + i * 8
-            v = abs(
-                math.sin(self._phase * 2.2 + i * 0.61)
-                * math.cos(self._phase * 0.7 + i * 0.19)
-            )
-            height = 4 + v * energy
-            c.create_line(
-                x,
-                bar_y - height / 2,
-                x,
-                bar_y + height / 2,
-                fill=color if abs(i) < 10 else "#176173",
-                width=3,
-            )
-
-        # Scanner line kept behind the core and away from the text baseline.
-        scan_y = (h * 0.12) + ((math.sin(self._phase * 0.55) + 1) / 2) * (h * 0.76)
-        c.create_line(w * 0.12, scan_y, w * 0.88, scan_y, fill="#0B333E", width=1)
 
     def _animate(self) -> None:
         self._phase += 0.065
@@ -863,9 +720,12 @@ class OrbitUI(ctk.CTk):
 
     def _log(self, kind: str, text: str) -> None:
         timestamp = time.strftime("%H:%M:%S")
-        clean = " ".join(str(text).split())
+        clean = clean_log_line(text, max_chars=900)
         self.logbox.configure(state="normal")
-        self.logbox.insert("end", f"[{timestamp}]  {kind:<7}  {clean}\n")
+        self.logbox.insert(
+            "end",
+            f"[{timestamp}]  {kind:<7}  {clean}\n",
+        )
         self.logbox.see("end")
         self.logbox.configure(state="disabled")
 
@@ -899,7 +759,7 @@ class OrbitUI(ctk.CTk):
                     text_color=self.AMBER,
                 )
                 self.last_tool_label.configure(text=f"LAST TOOL // {name.upper()}")
-                self._log("TOOL", f"{name} {args}")
+                self._log("TOOL", tool_payload_for_log(name, args))
 
             elif kind == "tool_result":
                 name, result = payload
@@ -910,7 +770,7 @@ class OrbitUI(ctk.CTk):
                     text="● TOOL EXECUTION SUCCESS" if ok else "● TOOL EXECUTION FAILED",
                     text_color=self.GREEN if ok else self.RED,
                 )
-                self._log("RESULT", f"{name}: {result}")
+                self._log("RESULT", tool_payload_for_log(name, result))
 
             elif kind == "system":
                 self._log("SYSTEM", payload)
@@ -960,6 +820,15 @@ class OrbitUI(ctk.CTk):
         if self._continuous_running:
             return
 
+        if (
+            self._continuous_thread is not None
+            and self._continuous_thread.is_alive()
+        ):
+            # A previous worker is still unwinding. Try again after the UI
+            # remains responsive instead of launching a concurrent recorder.
+            self.after(120, self.start_continuous)
+            return
+
         self._continuous_running = True
         self.listen_mode_value.configure(
             text="CONTINUOUS / MIC-GATED",
@@ -981,7 +850,8 @@ class OrbitUI(ctk.CTk):
             except Exception as exc:
                 self._event("error", exc)
             finally:
-                self._continuous_running = False
+                if self._continuous_thread is threading.current_thread():
+                    self._continuous_running = False
                 self._event("system", "Continuous listening stopped.")
 
         self._continuous_thread = threading.Thread(
@@ -995,10 +865,29 @@ class OrbitUI(ctk.CTk):
         if not self._continuous_running:
             return
 
+        thread = self._continuous_thread
         self.assistant.stop_continuous()
+
+        # The voice loop normally exits within one audio queue timeout. Waiting
+        # briefly here prevents a rapid F2 stop/start from leaving two loops alive.
+        if (
+            thread is not None
+            and thread.is_alive()
+            and thread is not threading.current_thread()
+        ):
+            thread.join(timeout=1.25)
+
         self._continuous_running = False
-        self.listen_mode_value.configure(text="MANUAL", text_color=self.AMBER)
-        self.auto_button.configure(text="F2  //  START AUTO LISTEN")
+        if thread is not None and not thread.is_alive():
+            self._continuous_thread = None
+
+        self.listen_mode_value.configure(
+            text="MANUAL",
+            text_color=self.AMBER,
+        )
+        self.auto_button.configure(
+            text="F2  //  START AUTO LISTEN",
+        )
         self.mode_label.configure(
             text="AUTONOMOUS AUDIO LOOP // PAUSED",
             text_color=self.AMBER,

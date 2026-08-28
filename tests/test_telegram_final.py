@@ -65,10 +65,10 @@ def test_final_v2_message_sequence(monkeypatch):
     assert ("press", "enter", {}) in fake_gui.calls
 
 
-def test_telegram_tool_never_requires_confirmation(tmp_path: Path):
+def test_telegram_tool_is_classified_as_requiring_confirmation(tmp_path: Path):
     cfg = AppConfig(confirm_external_actions=True)
     memory = MemoryStore(tmp_path / "memory.json")
     registry, telegram, _launcher = build_registry(cfg, memory)
     spec = registry.spec("send_telegram_message")
     assert spec is not None
-    assert spec.external_write is False
+    assert spec.requires_confirmation is True

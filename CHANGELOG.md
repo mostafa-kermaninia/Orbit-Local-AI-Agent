@@ -1,32 +1,45 @@
 # Changelog
 
-All notable changes to ORBIT are documented here.
-
-The project follows a simple semantic versioning scheme for course releases.
+All notable ORBIT course releases are documented here.
 
 ## [1.0.0] - 2026-08-28
 
-### Added
+### Core agent
 
-- Local STT with faster-whisper.
-- Local LLM inference through Ollama.
-- Natural-language tool calling and tool-result feedback.
-- Continuous hands-free listening.
-- Reliable half-duplex microphone gating during TTS.
-- Interruptible Windows SAPI TTS with pyttsx3 fallback.
-- Visible web search and multi-source web research.
-- Public webpage reading and summarization.
-- YouTube result opening with search fallback.
-- Telegram Desktop message automation using the local logged-in session.
-- Safe allowlisted application launcher.
-- CPU/RAM telemetry.
-- Explicit JSON-based long-term memory.
-- Procedural CustomTkinter/Tk Canvas HUD.
-- Setup checker, unit tests, CI, issue templates, and project documentation.
+- Local faster-whisper speech recognition.
+- Ollama/Qwen local reasoning and tool calling.
+- Continuous half-duplex voice loop.
+- Interruptible TTS and F8 manual interruption.
+- Explicit JSON long-term memory.
+- Tool registry and spoken tool-result feedback.
 
-### Reliability decisions
+### Tools
 
-- Default audio mode is `half_duplex`; experimental threshold-based barge-in is disabled.
-- `F8` is the manual interrupt shortcut, leaving `Esc` available to Telegram navigation.
-- Telegram demo behavior uses visible Windows Search and clipboard-safe Unicode input.
-- Web research returns fetched evidence to the local LLM and guards against pretending failed research succeeded.
+- Visible browser search.
+- Visible five-source web research with bounded evidence extraction.
+- Specific public webpage reading.
+- YouTube opening/search fallback.
+- Telegram Desktop automation.
+- Safe configured app aliases.
+- System telemetry.
+
+### Safety and reliability
+
+- Qwen default pinned to `qwen2.5:7b`.
+- Public config enables confirmation for side-effecting tools.
+- Separate course/demo config can intentionally disable confirmation dialogs.
+- Webpage reader blocks loopback/private/link-local destinations.
+- Redirect targets are validated before fetch.
+- Web responses and research evidence are size-bounded.
+- Retrieved web/tool content is explicitly treated as untrusted data.
+- Activity Stream tool payloads are redacted and truncated.
+- Telegram distinguishes local send-action completion from independent delivery verification.
+- Atomic memory writes preserve corrupt files instead of silently overwriting them.
+- Continuous listening uses per-session stop events to avoid rapid F2 restart races.
+
+### Repository quality
+
+- Windows CI for Python 3.11 and 3.12.
+- Critical Ruff checks and expanded unit tests.
+- Security, privacy, support, roadmap, provenance, contribution, and conduct documentation.
+- GitHub issue/PR templates, CODEOWNERS, and Dependabot configuration.

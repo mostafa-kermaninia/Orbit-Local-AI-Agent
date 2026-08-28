@@ -21,6 +21,7 @@ Run:
 
 ```powershell
 python -m compileall -q assistant tools ui scripts main.py
+python -m ruff check . --select E9,F63,F7,F82
 python -m pytest -q
 ```
 

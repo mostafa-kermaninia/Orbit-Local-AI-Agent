@@ -1,7 +1,7 @@
 {
   "assistant_name": "ORBIT",
   "ollama_host": "http://127.0.0.1:11434",
-  "ollama_model": "qwen2.5:3b",
+  "ollama_model": "qwen2.5:7b",
   "system_language": "en",
   "stt_model": "small",
   "stt_language": "en",
@@ -25,7 +25,7 @@
   "speak_startup_greeting": true,
   "startup_greeting": "ORBIT online. Local systems are ready. I'm listening.",
   "speak_tool_results": true,
-  "confirm_external_actions": true,
+  "confirm_external_actions": false,
   "web_fetch_timeout_seconds": 12.0,
   "web_research_results": 5,
   "web_page_char_limit": 4000,
