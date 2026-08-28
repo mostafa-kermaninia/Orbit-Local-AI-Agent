@@ -323,6 +323,7 @@ More examples: [docs/DEMO_COMMANDS.md](docs/DEMO_COMMANDS.md).
 ```text
 Orbit-Local-AI-Agent/
 ├── assistant/
+│   ├── action_policy.py
 │   ├── audio.py
 │   ├── config.py
 │   ├── llm.py
