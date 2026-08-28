@@ -680,13 +680,27 @@ class OrbitUI(ctk.CTk):
             label.configure(text_color=color if name == active else self.DIM)
 
     def _draw_hud(self) -> None:
+        """Draw the central ORBIT HUD.
+
+        Design goals:
+        - keep all typography inside a dedicated static safe-zone;
+        - keep animated rings outside that safe-zone;
+        - scale the core with the available canvas instead of a small fixed cap;
+        - draw scanner/grid layers behind the core so animation never crosses text.
+        """
         c = self.canvas
         w = max(1, c.winfo_width())
         h = max(1, c.winfo_height())
-        cx, cy = w / 2, h / 2
+
+        # Leave extra room below for the waveform.
+        cx = w / 2
+        cy = h * 0.46
         c.delete("all")
 
-        # Responsive grid -- density follows canvas size.
+        color = self._state_color()
+        pulse = (math.sin(self._phase * 1.8) + 1.0) / 2.0
+
+        # Background grid.
         spacing = 46 if w >= 760 else 38
         offset = int((self._phase * 4) % spacing)
         for x in range(-spacing + offset, int(w) + spacing, spacing):
@@ -694,9 +708,18 @@ class OrbitUI(ctk.CTk):
         for y in range(-spacing + offset, int(h) + spacing, spacing):
             c.create_line(0, y, w, y, fill="#07171E", width=1)
 
+        # Scanner is painted first so it can never cross title/state text.
+        scan_y = (h * 0.10) + (
+            (math.sin(self._phase * 0.55) + 1) / 2
+        ) * (h * 0.78)
+        c.create_line(
+            w * 0.10, scan_y, w * 0.90, scan_y,
+            fill="#0A2D37", width=1,
+        )
+
         # Corner targeting marks.
-        margin = max(20, min(30, int(min(w, h) * 0.06)))
-        arm = max(26, min(42, int(min(w, h) * 0.075)))
+        margin = max(22, min(32, int(min(w, h) * 0.06)))
+        arm = max(30, min(44, int(min(w, h) * 0.078)))
         for x1, y1, sx, sy in [
             (margin, margin, 1, 1),
             (w - margin, margin, -1, 1),
@@ -706,135 +729,165 @@ class OrbitUI(ctk.CTk):
             c.create_line(x1, y1, x1 + sx * arm, y1, fill="#15505F", width=2)
             c.create_line(x1, y1, x1, y1 + sy * arm, fill="#15505F", width=2)
 
-        # Clamp the core so it never collides with the lower readout/pipeline.
+        # Larger responsive core.
         min_dim = min(w, h)
-        base = max(76.0, min(132.0, min_dim * 0.17))
-        color = self._state_color()
-        pulse = (math.sin(self._phase * 1.8) + 1.0) / 2.0
+        base = max(304.0, min(166.0, min_dim * 0.235))
+        outer_r = base * 1.72
 
-        # Subtle horizon / targeting lines.
-        c.create_line(w * 0.13, cy, w * 0.36, cy, fill="#0D3540", width=1)
-        c.create_line(w * 0.64, cy, w * 0.87, cy, fill="#0D3540", width=1)
+        # Horizon lines stop before reaching the HUD.
+        left_end = max(w * 0.14, cx - outer_r - 24)
+        right_start = min(w * 0.86, cx + outer_r + 24)
+        c.create_line(w * 0.13, cy, left_end, cy, fill="#0D3540", width=1)
+        c.create_line(right_start, cy, w * 0.87, cy, fill="#0D3540", width=1)
 
-        # Rotating segmented rings.
+        # Animated segmented rings.
         rings = [
-            (base * 1.72, 2.0, 56),
-            (base * 1.48, -2.8, 78),
-            (base * 1.24, 3.7, 42),
+            (base * 1.72, 2.0, 54, 3),
+            (base * 1.48, -2.7, 72, 2),
+            (base * 1.26, 3.5, 40, 2),
         ]
-        for radius, speed, extent in rings:
-            start = (self._phase * speed * 18) % 360
+        for radius, speed, extent, width in rings:
+            ring_start = (self._phase * speed * 18) % 360
             for k in range(4):
-                a = start + k * 90
+                angle = ring_start + k * 90
                 c.create_arc(
-                    cx - radius,
-                    cy - radius,
-                    cx + radius,
-                    cy + radius,
-                    start=a,
+                    cx - radius, cy - radius,
+                    cx + radius, cy + radius,
+                    start=angle,
                     extent=extent,
                     style="arc",
-                    outline="#176173" if k % 2 else color,
-                    width=2,
+                    outline=color if k % 2 == 0 else "#176173",
+                    width=width,
                 )
+
+        # Engineering ticks.
+        for degree in range(0, 360, 30):
+            a = math.radians(degree)
+            r1 = base * 1.56
+            r2 = base * 1.62
+            c.create_line(
+                cx + math.cos(a) * r1,
+                cy + math.sin(a) * r1,
+                cx + math.cos(a) * r2,
+                cy + math.sin(a) * r2,
+                fill="#155465",
+                width=1,
+            )
+
+        # Orbiting telemetry nodes.
+        for i in range(8):
+            angle = self._phase * (0.52 if i % 2 else -0.42) + i * math.tau / 8
+            radius = base * (1.42 if i % 2 else 1.64)
+            x = cx + math.cos(angle) * radius
+            y = cy + math.sin(angle) * radius
+            node_r = 3 if i % 3 else 5
+            c.create_oval(
+                x - node_r, y - node_r,
+                x + node_r, y + node_r,
+                fill=color, outline="",
+            )
 
         def hex_points(radius: float, angle_shift: float = 0.0) -> list[float]:
             pts: list[float] = []
             for i in range(6):
-                a = angle_shift + math.radians(60 * i - 30)
-                pts.extend([cx + math.cos(a) * radius, cy + math.sin(a) * radius])
+                angle = angle_shift + math.radians(60 * i - 30)
+                pts.extend([
+                    cx + math.cos(angle) * radius,
+                    cy + math.sin(angle) * radius,
+                ])
             return pts
 
+        # Opaque core layers create a protected typography zone.
         c.create_polygon(
-            hex_points(base * 1.07, self._phase * 0.05),
+            hex_points(base * 1.03, self._phase * 0.035),
             outline="#1B7182",
             fill="#04151B",
             width=2,
         )
         c.create_polygon(
-            hex_points(base * 0.78, -self._phase * 0.08),
+            hex_points(base * 0.78, -self._phase * 0.055),
             outline=color,
-            fill="#07242C",
+            fill="#061D25",
             width=3,
         )
         c.create_oval(
-            cx - base * 0.54,
-            cy - base * 0.54,
-            cx + base * 0.54,
-            cy + base * 0.54,
-            outline="#8DF6FF",
+            cx - base * 0.53, cy - base * 0.53,
+            cx + base * 0.53, cy + base * 0.53,
+            fill="#06171E",
+            outline="#81EFF8",
             width=1,
         )
-        glow = base * (0.38 + 0.03 * pulse)
+
+        glow = base * (0.405 + 0.025 * pulse)
         c.create_oval(
-            cx - glow,
-            cy - glow,
-            cx + glow,
-            cy + glow,
-            fill="#0A3A45",
+            cx - glow, cy - glow,
+            cx + glow, cy + glow,
+            fill="#082A34",
             outline=color,
             width=2,
         )
 
-        # Orbiting data nodes.
-        for i in range(8):
-            a = self._phase * (0.55 if i % 2 else -0.43) + i * math.tau / 8
-            radius = base * (1.39 if i % 2 else 1.62)
-            x = cx + math.cos(a) * radius
-            y = cy + math.sin(a) * radius
-            r = 3 if i % 3 else 5
-            c.create_oval(x - r, y - r, x + r, y + r, fill=color, outline="")
+        halo = base * 0.31
+        c.create_oval(
+            cx - halo, cy - halo,
+            cx + halo, cy + halo,
+            outline="#2E7D8D",
+            width=1,
+        )
 
-        # Core typography has guaranteed spacing; no tagline inside the hexagon.
-        title_size = 24 if base >= 110 else 20
+        # Only title + state live inside the animated core.
+        title_size = 30 if base >= 135 else 26
+        state_size = 12 if base >= 125 else 10
+
         c.create_text(
             cx,
-            cy - 15,
+            cy - base * 0.08,
             text=self.config.assistant_name,
             fill=self.TEXT,
             font=("Segoe UI", title_size, "bold"),
         )
+
+        sep_y = cy + base * 0.05
+        c.create_line(
+            cx - base * 0.20, sep_y,
+            cx + base * 0.20, sep_y,
+            fill="#1B5663",
+            width=1,
+        )
+
         c.create_text(
             cx,
-            cy + 19,
+            cy + base * 0.22,
             text=self._state,
             fill=color,
-            font=("Consolas", 11, "bold"),
+            font=("Consolas", state_size, "bold"),
         )
 
-        # Tagline moved OUTSIDE the core; this fixes the overlap visible in the screenshot.
-        tagline_y = cy + base * 1.05
-        c.create_text(
-            cx,
-            tagline_y,
-            text="VOICE  //  REASON  //  ACT",
-            fill="#6F9DA8",
-            font=("Consolas", 8, "bold"),
-        )
+        # Waveform sits completely outside the largest ring.
+        active = self._state in {
+            "LISTENING", "TRANSCRIBING", "THINKING", "SPEAKING"
+        }
+        energy = 30 if active else 8
+        desired_bar_y = cy + outer_r + 20
+        bar_y = min(h - 26, desired_bar_y)
+        available = max(8.0, h - bar_y - 8)
+        energy = min(energy, available * 1.7)
 
-        # Synthetic signal bars sit well below the tagline.
-        active = self._state in {"LISTENING", "TRANSCRIBING", "THINKING", "SPEAKING"}
-        energy = 28 if active else 8
-        bar_y = min(h - 34, cy + base * 1.52)
-        for i in range(-15, 16):
+        for i in range(-17, 18):
             x = cx + i * 8
-            v = abs(
+            value = abs(
                 math.sin(self._phase * 2.2 + i * 0.61)
                 * math.cos(self._phase * 0.7 + i * 0.19)
             )
-            height = 4 + v * energy
+            height = 4 + value * energy
             c.create_line(
                 x,
                 bar_y - height / 2,
                 x,
                 bar_y + height / 2,
-                fill=color if abs(i) < 10 else "#176173",
+                fill=color if abs(i) < 11 else "#176173",
                 width=3,
             )
-
-        # Scanner line kept behind the core and away from the text baseline.
-        scan_y = (h * 0.12) + ((math.sin(self._phase * 0.55) + 1) / 2) * (h * 0.76)
-        c.create_line(w * 0.12, scan_y, w * 0.88, scan_y, fill="#0B333E", width=1)
 
     def _animate(self) -> None:
         self._phase += 0.065

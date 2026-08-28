@@ -1,4 +1,4 @@
-# ORBIT — Clean-room Local Voice Assistant
+# ORBIT — Local AI Voice Agent
 
 ORBIT is a from-scratch educational local voice assistant built for teaching an end-to-end speech/agent pipeline:
 
