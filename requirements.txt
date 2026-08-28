@@ -11,4 +11,4 @@ pyttsx3>=2.99,<3
 yt-dlp>=2026.1.0,<2027
 pyautogui>=0.9.54,<1
 pyperclip>=1.9.0,<2
-beautifulsoup4>=4.14,<5
+beautifulsoup4>=4.15.0,<5
