@@ -33,6 +33,11 @@
 > **Course companion project** for **«آموزش پروژه‌محور پردازش صوت و گفتار با پایتون»**  
 > Created and maintained by **Mostafa Kermaninia**.
 
+<p align="center">
+  <img src="docs/assets/orbit-dashboard.png"
+       alt="ORBIT Local AI Voice Agent dashboard"
+       width="100%">
+</p>
 ---
 
 
