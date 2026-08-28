@@ -86,7 +86,28 @@ def tool_payload_for_log(
     *,
     max_chars: int = 850,
 ) -> str:
-    compact = _compact(payload)
+    # Keep Telegram log entries useful without exposing message bodies or
+    # noisy desktop-automation internals.
+    if tool_name == "send_telegram_message" and isinstance(payload, dict):
+        if "message" in payload:
+            compact = {
+                "contact": payload.get("contact"),
+                "message": _redacted(payload.get("message", "")),
+            }
+        elif payload.get("ok") is True:
+            compact = {
+                "ok": True,
+                "contact": payload.get("contact"),
+                "action_completed": bool(payload.get("action_completed", True)),
+            }
+        else:
+            compact = {
+                "ok": False,
+                "contact": payload.get("contact"),
+                "error": payload.get("error") or payload.get("message") or "Action failed.",
+            }
+    else:
+        compact = _compact(payload)
     rendered = json.dumps(
         compact,
         ensure_ascii=False,
