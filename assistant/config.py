@@ -9,19 +9,14 @@ from typing import Any
 @dataclass(slots=True)
 class AppConfig:
     assistant_name: str = "ORBIT"
-
-    # Local LLM
     ollama_host: str = "http://127.0.0.1:11434"
-    ollama_model: str = "qwen2.5:7b"
-
-    # Speech recognition
+    ollama_model: str = "qwen2.5"
     system_language: str = "en"
+
     stt_model: str = "small"
     stt_language: str = "en"
     stt_device: str = "cpu"
     stt_compute_type: str = "int8"
-
-    # Audio capture
     sample_rate: int = 16_000
     audio_chunk: int = 1024
     silence_threshold: float = 0.018
@@ -31,28 +26,24 @@ class AppConfig:
     # Hands-free operation.
     continuous_listening: bool = True
     auto_start_listening: bool = True
-
     # Reliable default: keep the microphone closed while TTS is playing.
-    # Experimental threshold-based barge-in remains available for users who
-    # have headphones or an echo-cancelled audio path.
+    # This prevents the assistant from hearing its own speakers.
     audio_interaction_mode: str = "half_duplex"  # half_duplex | experimental_barge_in
     barge_in_enabled: bool = False
+    # Barge-in needs a higher threshold than normal listening because the mic can
+    # hear the assistant's own speakers. Tune this for the room/microphone.
     barge_in_threshold: float = 0.065
     barge_in_silence_seconds: float = 0.55
     barge_in_grace_seconds: float = 0.75
 
-    # Speech output
     tts_enabled: bool = True
     tts_rate: int = 185
-    tts_backend: str = "auto"
+    tts_backend: str = "auto"  # auto -> Windows SAPI subprocess on Windows, pyttsx3 elsewhere
     speak_startup_greeting: bool = True
     startup_greeting: str = "ORBIT online. Local systems are ready. I'm listening."
     speak_tool_results: bool = True
-
-    # Tool policy
     confirm_external_actions: bool = False
 
-    # Web research
     web_fetch_timeout_seconds: float = 12.0
     web_research_results: int = 5
     web_page_char_limit: int = 7000
@@ -66,13 +57,10 @@ class AppConfig:
     telegram_search_wait_seconds: float = 1.6
     telegram_chat_wait_seconds: float = 0.9
 
-    # Safe application launcher
-    app_aliases: dict[str, str] = field(
-        default_factory=lambda: {
-            "notepad": "notepad.exe",
-            "calculator": "calc.exe",
-        }
-    )
+    app_aliases: dict[str, str] = field(default_factory=lambda: {
+        "notepad": "notepad.exe",
+        "calculator": "calc.exe",
+    })
 
 
 def _merge_dataclass(default: AppConfig, raw: dict[str, Any]) -> AppConfig:
@@ -84,14 +72,9 @@ def _merge_dataclass(default: AppConfig, raw: dict[str, Any]) -> AppConfig:
 def load_config(path: str | Path = "config.json") -> AppConfig:
     path = Path(path)
     default = AppConfig()
-
     if not path.exists():
-        path.write_text(
-            json.dumps(asdict(default), ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        path.write_text(json.dumps(asdict(default), ensure_ascii=False, indent=2), encoding="utf-8")
         return default
-
     try:
         raw = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(raw, dict):
@@ -102,7 +85,4 @@ def load_config(path: str | Path = "config.json") -> AppConfig:
 
 
 def save_config(config: AppConfig, path: str | Path = "config.json") -> None:
-    Path(path).write_text(
-        json.dumps(asdict(config), ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
+    Path(path).write_text(json.dumps(asdict(config), ensure_ascii=False, indent=2), encoding="utf-8")

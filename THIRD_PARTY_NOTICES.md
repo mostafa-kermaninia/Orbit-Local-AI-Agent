@@ -27,7 +27,7 @@ Model weights are not covered by ORBIT's MIT License.
 
 The recommended course model is:
 
-- **Qwen2.5 7B** — published upstream under Apache-2.0.
+- **Qwen2.5** — published upstream under Apache-2.0.
 
 Other Qwen sizes, other Ollama models, Whisper variants, and future model releases can use different terms. Always verify the exact model/version before redistribution or commercial use.
 

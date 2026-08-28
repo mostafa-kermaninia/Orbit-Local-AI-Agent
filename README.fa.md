@@ -13,7 +13,7 @@ Microphone
    ↓
 faster-whisper (STT)
    ↓
-Ollama / Qwen2.5 7B
+Ollama / Qwen2.5
    ↓
 Tool Registry
    ├── Web Research
@@ -57,7 +57,7 @@ py -3.12 -m venv .venv
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 
-ollama pull qwen2.5:7b
+ollama pull qwen2.5
 
 Copy-Item config.example.json config.json
 python scripts/check_setup.py
@@ -120,7 +120,7 @@ ORBIT از Bot API استفاده نمی‌کند. ابزار تلگرام رو�
 برای نسخه دوره:
 
 ```powershell
-ollama pull qwen2.5:7b
+ollama pull qwen2.5
 ```
 
 Tool Calling می‌تواند بین مدل‌ها و Quantizationهای مختلف تفاوت داشته باشد؛ بنابراین برای ضبط یا Release دقیقاً همان مدلی را تست کن که در `config.json` ثبت شده است.

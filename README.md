@@ -45,7 +45,7 @@ Microphone
 faster-whisper
 Speech-to-Text
    ↓
-Ollama + Qwen2.5 7B
+Ollama + Qwen2.5
 Local reasoning + tool selection
    ↓
 Tool Registry
@@ -88,7 +88,7 @@ The default interaction mode is **hands-free half-duplex**: ORBIT automatically 
 ```mermaid
 flowchart LR
     MIC[Microphone] --> STT[faster-whisper]
-    STT --> LLM[Ollama / Qwen2.5 7B]
+    STT --> LLM[Ollama / Qwen2.5]
     LLM --> REG[Tool Registry]
     REG --> WEB[Web Research]
     REG --> YT[YouTube]
@@ -145,10 +145,10 @@ Set-ExecutionPolicy -Scope Process Bypass
 ### 3. Pull the recommended local model
 
 ```powershell
-ollama pull qwen2.5:7b
+ollama pull qwen2.5
 ```
 
-The course build recommends **Qwen2.5 7B** for a reproducible default. You can select another compatible Ollama model in `config.json`, but tool-calling behavior may differ.
+The course build recommends **Qwen2.5** for a reproducible default. You can select another compatible Ollama model in `config.json`, but tool-calling behavior may differ.
 
 ### 4. Create your local configuration
 
@@ -244,7 +244,7 @@ The main settings live in `config.json`.
 {
   "assistant_name": "ORBIT",
   "ollama_host": "http://127.0.0.1:11434",
-  "ollama_model": "qwen2.5:7b",
+  "ollama_model": "qwen2.5",
   "stt_model": "small",
   "stt_language": "en",
   "continuous_listening": true,

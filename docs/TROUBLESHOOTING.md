@@ -150,7 +150,7 @@ ollama list
 For the recommended course build:
 
 ```powershell
-ollama pull qwen2.5:7b
+ollama pull qwen2.5
 ```
 
 Then:
