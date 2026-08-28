@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+config.json
+data/memory.json
+data/*.wav
+*.session
+.DS_Store
+.idea/
+.vscode/
