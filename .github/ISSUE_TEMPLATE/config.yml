@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Course / usage questions
+    url: https://github.com/mostafa-kermaninia/Orbit-Local-AI-Agent/discussions
+    about: Ask non-bug questions in GitHub Discussions.
