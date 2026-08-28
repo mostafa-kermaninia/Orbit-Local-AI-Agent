@@ -1,7 +1,5 @@
 # ORBIT — Clean-room Local Voice Assistant
 
-> **Working title only.** Rename the project before commercial publication and do a trademark check for your final brand.
-
 ORBIT is a from-scratch educational local voice assistant built for teaching an end-to-end speech/agent pipeline:
 
 ```text
@@ -28,7 +26,6 @@ The repository is an independent clean-room implementation with original source,
 - Natural-language tool calling
 
 - Hands-free continuous listening: no LISTEN button required
-- Best-effort voice barge-in: speaking over the assistant interrupts TTS and the new utterance becomes the next command
 - Spoken startup greeting and explicit spoken success/failure feedback after tool calls
 - Read-and-summarize web tools (`research_web`, `read_webpage`) in addition to visible browser search
 - Rebuilt high-tech procedural HUD with rotating rings, signal bars, tool bus, CPU/RAM/network telemetry, and live state visualization
@@ -273,10 +270,6 @@ That order follows the data flow rather than reading files alphabetically.
 - Keep `config.json` out of Git; `.gitignore` already excludes it.
 
 ## 9. Licensing / commercial-course checklist
-
-The source files in this repository were written as a clean-room implementation for this project. Replace `<YOUR NAME>` in `LICENSE` before publishing.
-
-Dependencies and model weights have their own licenses. `THIRD_PARTY_NOTICES.md` lists the main Python packages, but **you must verify the exact license of the Ollama model and any speech/TTS model weights you choose to redistribute or use commercially**.
 
 You should select your own final product name and check trademarks before using that branding commercially.
 
