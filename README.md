@@ -36,7 +36,6 @@
        width="100%">
 </p>
 
-> **Course companion project** for **«آموزش پروژه‌محور پردازش صوت و گفتار با پایتون»**  
 > Created and maintained by **Mostafa Kermaninia**.
 
 ---
