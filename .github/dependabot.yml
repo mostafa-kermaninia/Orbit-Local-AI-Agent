@@ -1,13 +1,19 @@
 version: 2
+
 updates:
+  # Python dependencies:
+  # Disable routine version-update PRs for the stable course build.
+  # Security update PRs can still be created when a vulnerability is found.
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 5
+      interval: "monthly"
+    open-pull-requests-limit: 0
 
+  # GitHub Actions:
+  # Same policy: no routine upgrade noise, keep security monitoring active.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 0
