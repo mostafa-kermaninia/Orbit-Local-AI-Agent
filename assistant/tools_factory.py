@@ -106,8 +106,11 @@ def build_registry(
         ToolSpec(
             name="open_youtube",
             description=(
-                "Find a requested video/topic on YouTube and open the first "
-                "resolved result; fall back to YouTube search results if needed."
+                "Find a requested video/topic on YouTube, open the first resolved "
+                "result, and return its exact URL. If a later user-requested tool "
+                "needs that link, use the returned url value exactly; never invent "
+                "or guess a YouTube URL. Fall back to the YouTube search-results "
+                "URL only when direct resolution fails."
             ),
             parameters={
                 "type": "object",

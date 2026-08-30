@@ -66,7 +66,7 @@ def explicit_user_authorization(
 
         english_command = bool(
             re.search(
-                r"(?:^|\bthen\s+|\band\s+then\s+)"
+                r"(?:^|\bthen\s+|\band\s+then\s+|\band\s+|\balso\s+)"
                 r"(?:please\s+|can\s+you\s+|could\s+you\s+|would\s+you\s+)?"
                 r"(?:open|launch|start|run)\b",
                 text,

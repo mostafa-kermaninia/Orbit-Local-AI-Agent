@@ -52,3 +52,19 @@ def test_discussing_how_to_open_notepad_does_not_authorize_launch():
         "Research how to open Notepad safely on Windows.",
         {"app": "notepad"},
     )
+
+
+def test_open_app_is_authorized_as_explicit_second_step():
+    assert explicit_user_authorization(
+        "open_app",
+        "Send a Telegram message to Amir saying hello, and open Notepad.",
+        {"app": "notepad"},
+    )
+
+
+def test_open_app_discussion_is_still_not_authorized():
+    assert not explicit_user_authorization(
+        "open_app",
+        "Research how to open Notepad safely, and summarize the result.",
+        {"app": "notepad"},
+    )
