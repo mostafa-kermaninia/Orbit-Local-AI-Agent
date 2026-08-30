@@ -10,7 +10,6 @@ updates:
       interval: "monthly"
     open-pull-requests-limit: 0
 
-  # GitHub Actions:
   # Same policy: no routine upgrade noise, keep security monitoring active.
   - package-ecosystem: "github-actions"
     directory: "/"
